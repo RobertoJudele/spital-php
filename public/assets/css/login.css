@@ -1,0 +1,16 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+.auth-card h1 {
+  margin-bottom: 12px;
+}
+.auth-card .muted {
+  margin-bottom: 12px;
+}
