@@ -31,32 +31,23 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
       <h2>Doctors</h2>
       <table>
         <tr>
-          <th>#</th><th>First name</th><th>Last name</th><th>Email</th>
-          <th>Department</th><th>Specialization</th><th>Grade</th><th>Actions</th>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Specialization</th>
+          <th>Grade</th>
         </tr>
-        <?php foreach ($doctors as $doc): ?>
+        <?php foreach ($doctors as $i => $d): ?>
           <tr>
-            <td><?= (int) $doc['id'] ?></td>
-            <td><?= e($doc['first_name']) ?></td>
-            <td><?= e($doc['last_name']) ?></td>
-            <td><?= e($doc['email']) ?></td>
-            <td><?= e($doc['department'] ?? '') ?></td>
-            <td><?= e($doc['specialization'] ?? '') ?></td>
-            <td><?= e($doc['grade'] ?? '') ?></td>
-            <td class="actions">
-              <a href="<?= $base ?>/index.php?r=spital/doctors/edit&id=<?= (int) $doc[
-    'id'
-] ?>">Edit</a>
-              <form action="<?= $base ?>/index.php?r=spital/doctors/delete" method="POST" onsubmit="return confirm('Delete doctor <?= e(
-    $doc['first_name'] . ' ' . $doc['last_name'],
-) ?>?')">
-                <input type="hidden" name="csrf_token" value="<?= e(
-                    Csrf::token(),
-                ) ?>">
-                <input type="hidden" name="id" value="<?= (int) $doc['id'] ?>">
-                <button type="submit">Delete</button>
-              </form>
-            </td>
+            <td><?= $i + 1 ?></td>
+            <td><?= e(
+                ($d['last_name'] ?? '') . ' ' . ($d['first_name'] ?? ''),
+            ) ?></td>
+            <td><?= e($d['email'] ?? '') ?></td>
+            <td><?= e($d['department'] ?? '') ?></td>
+            <td><?= e($d['specialization'] ?? '') ?></td>
+            <td><?= e($d['grade'] ?? '') ?></td>
           </tr>
         <?php endforeach; ?>
       </table>
@@ -134,6 +125,41 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
         <input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>">
         <button type="submit">Import medications (FDA)</button>
       </form>
+    </section>
+
+    <section class="card col-12">
+      <h2>Pending appointments</h2>
+      <?php if (!empty($pendingAppointments)): ?>
+        <table>
+          <tr><th>#</th><th>Date</th><th>Patient</th><th>Doctor</th><th>Actions</th></tr>
+          <?php foreach ($pendingAppointments as $a): ?>
+            <tr>
+              <td><?= (int) $a['id'] ?></td>
+              <td><?= e($a['date']) ?></td>
+              <td><?= e($a['patient_last'] . ' ' . $a['patient_first']) ?></td>
+              <td><?= e($a['doctor_last'] . ' ' . $a['doctor_first']) ?></td>
+              <td class="actions" style="display:flex; gap:.5rem">
+                <form action="<?= $base ?>/index.php?r=spital/appointments/approve" method="POST">
+                  <input type="hidden" name="csrf_token" value="<?= e(
+                      Csrf::token(),
+                  ) ?>">
+                  <input type="hidden" name="id" value="<?= (int) $a['id'] ?>">
+                  <button type="submit">Approve</button>
+                </form>
+                <form action="<?= $base ?>/index.php?r=spital/appointments/reject" method="POST">
+                  <input type="hidden" name="csrf_token" value="<?= e(
+                      Csrf::token(),
+                  ) ?>">
+                  <input type="hidden" name="id" value="<?= (int) $a['id'] ?>">
+                  <button type="submit">Reject</button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </table>
+      <?php else: ?>
+        <p class="muted">No pending requests.</p>
+      <?php endif; ?>
     </section>
   </div>
 </body>

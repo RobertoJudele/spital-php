@@ -1,90 +1,112 @@
 <!-- filepath: /Applications/XAMPP/xamppfiles/htdocs/spital-php/app/views/doctors/create.php -->
+<?php
+require_once 'app/helpers/esc.php';
+require_once 'app/middleware/Csrf.php';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Doctor</title>
-    <script>
-        // Specializările pentru fiecare departament
-        const specializations = {
-            "Cardiologie": ["Cardiologie intervențională", "Electrofiziologie", "Cardiologie pediatrică"],
-            "Neurologie": ["Neurochirurgie", "Neurologie pediatrică", "Epileptologie"],
-            "Chirurgie": ["Chirurgie generală", "Chirurgie plastică", "Chirurgie vasculară"],
-            "Pediatrie": ["Neonatologie", "Pediatrie generală", "Pediatrie oncologică"],
-            "Radiologie": ["Radiologie imagistică", "Radioterapie", "Radiologie intervențională"],
-            "Oncologie": ["Oncologie medicală", "Hematologie oncologică", "Oncologie pediatrică"]
-        };
+  <meta charset="UTF-8">
+  <title>Creează cont doctor</title>
+  <link rel="stylesheet" href="<?= $base ?>/public/assets/css/dashboard-shared.css">
+  <link rel="stylesheet" href="<?= $base ?>/public/assets/css/login.css">
+  <script>
+    const specializations = {
+      "Cardiologie": ["Cardiologie intervențională", "Electrofiziologie", "Cardiologie pediatrică"],
+      "Neurologie": ["Neurochirurgie", "Neurologie pediatrică", "Epileptologie"],
+      "Chirurgie": ["Chirurgie generală", "Chirurgie plastică", "Chirurgie vasculară"],
+      "Pediatrie": ["Neonatologie", "Pediatrie generală", "Pediatrie oncologică"],
+      "Radiologie": ["Radiologie imagistică", "Radioterapie", "Radiologie intervențională"],
+      "Oncologie": ["Oncologie medicală", "Hematologie oncologică", "Oncologie pediatrică"]
+    };
 
-        // Funcție pentru actualizarea specializărilor
-        function updateSpecializations() {
-            const department = document.getElementById("department").value;
-            const specializationSelect = document.getElementById("specialization");
+    function updateSpecializations() {
+      const department = document.getElementById("department").value;
+      const specializationSelect = document.getElementById("specialization");
+      specializationSelect.innerHTML = '<option value="" disabled selected>Alege specializarea</option>';
+      if (specializations[department]) {
+        specializations[department].forEach(specialization => {
+          const option = document.createElement("option");
+          option.value = specialization;
+          option.textContent = specialization;
+          specializationSelect.appendChild(option);
+        });
+      }
+    }
 
-            // Golește lista de specializări
-            specializationSelect.innerHTML = "";
-
-            // Adaugă specializările corespunzătoare departamentului selectat
-            if (specializations[department]) {
-                specializations[department].forEach(specialization => {
-                    const option = document.createElement("option");
-                    option.value = specialization;
-                    option.textContent = specialization;
-                    specializationSelect.appendChild(option);
-                });
-            }
-        }
-    </script>
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSpecializations();
+    });
+  </script>
 </head>
 <body>
-    <h1>Create a New Doctor</h1>
-    <?php $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
-    <form action="<?= $base ?>/index.php?r=spital/doctors/create" method="POST">
-        <label for="first_name">First Name:</label>
-        <input type="text" name="first_name" id="first_name" maxlength="128" required>
-        <br>
+  <div class="login-page">
+    <section class="card auth-card">
+      <h1>Creează cont doctor</h1>
 
-        <label for="last_name">Last Name:</label>
-        <input type="text" name="last_name" id="last_name" maxlength="128" required>
-        <br>
+      <?php if (!empty($_SESSION['error'])): ?>
+        <div class="error"><?= e($_SESSION['error']) ?></div>
+        <?php unset($_SESSION['error']); ?>
+      <?php endif; ?>
+      <?php if (!empty($_SESSION['msg'])): ?>
+        <div class="notice"><?= e($_SESSION['msg']) ?></div>
+        <?php unset($_SESSION['msg']); ?>
+      <?php endif; ?>
 
-        <label for="email">Email:</label>
-        <input type="email" name="email" id="email" maxlength="128" required>
-        <br>
+      <!-- scoate 'novalidate' ca să funcționeze validarea din browser -->
+      <form action="<?= $base ?>/index.php?r=spital/doctors/create" method="POST">
+        <input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>">
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" maxlength="128" required>
-        <br>
+        <label>Prenume
+          <input type="text" name="first_name" id="first_name" maxlength="128" required>
+        </label>
 
-        <label for="department">Department:</label>
-        <select name="department" id="department" onchange="updateSpecializations()">
+        <label>Nume
+          <input type="text" name="last_name" id="last_name" maxlength="128" required>
+        </label>
+
+        <label>Email
+          <input type="email" name="email" id="email" maxlength="128" required>
+        </label>
+
+        <label>Parolă
+          <input type="password" name="password" id="password" maxlength="128" required>
+        </label>
+
+        <label>Departament
+          <select name="department" id="department" required onchange="updateSpecializations()">
+            <option value="" disabled selected>Alege departamentul</option>
             <option value="Cardiologie">Cardiologie</option>
             <option value="Neurologie">Neurologie</option>
             <option value="Chirurgie">Chirurgie</option>
             <option value="Pediatrie">Pediatrie</option>
             <option value="Radiologie">Radiologie</option>
             <option value="Oncologie">Oncologie</option>
-        </select>
-        <br>
+          </select>
+        </label>
 
-        <label for="specialization">Specialization:</label>
-        <select name="specialization" id="specialization">
-            <!-- Specializările vor fi populate dinamic -->
-        </select>
-        <br>
+        <label>Specializare
+          <select name="specialization" id="specialization" required>
+            <option value="" disabled selected>Alege specializarea</option>
+          </select>
+        </label>
 
-        <label for="grade">Grade:</label>
-        <select name="grade" id="grade">
+        <label>Grad
+          <select name="grade" id="grade" required>
+            <option value="" disabled selected>Alege gradul</option>
             <option value="Rezident">Rezident</option>
             <option value="Specialist">Specialist</option>
             <option value="Primar">Primar</option>
             <option value="Asistent universitar">Asistent universitar</option>
             <option value="Șef de secție">Șef de secție</option>
             <option value="Director medical">Director medical</option>
-        </select>
-        <br>
+          </select>
+        </label>
 
-        <button type="submit">Create Doctor</button>
-    </form>
+        <button type="submit">Creează doctor</button>
+      </form>
+    </section>
+  </div>
 </body>
 </html>

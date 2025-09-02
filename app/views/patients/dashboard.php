@@ -179,9 +179,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <tr><th>#</th><th>Date</th><th>Status</th><th>Doctor</th></tr>
               </thead>
               <tbody>
-                <?php foreach ($appointments as $a): ?>
+                <?php foreach ($appointments as $i => $a): ?>
                   <tr>
-                    <td><?= (int) $a['id'] ?></td>
+                    <td><?= $i + 1 ?></td>
                     <td><?= e($a['date']) ?></td>
                     <td>
                       <?php
@@ -254,9 +254,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <tr><th>#</th><th>Doctor</th><th>Initial observations</th></tr>
               </thead>
               <tbody>
-                <?php foreach ($medicalRecords as $mr): ?>
+                <?php foreach ($medicalRecords as $i => $mr): ?>
                   <tr>
-                    <td><?= (int) $mr['id'] ?></td>
+                    <td><?= $i + 1 ?></td>
                     <td><?= e(
                         ($mr['doctor_last'] ?? '') .
                             ' ' .
@@ -280,9 +280,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <tr><th>#</th><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Notes</th></tr>
               </thead>
               <tbody>
-                <?php foreach ($consultations as $c): ?>
+                <?php foreach ($consultations as $i => $c): ?>
                   <tr>
-                    <td><?= (int) $c['id'] ?></td>
+                    <td><?= $i + 1 ?></td>
                     <td><?= e($c['consultation_date']) ?></td>
                     <td><?= e(
                         ($c['doctor_last'] ?? '') .
@@ -308,21 +308,18 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
                 <tr><th>#</th><th>Doctor</th><th>Prescription</th></tr>
               </thead>
               <tbody>
-                <?php foreach ($prescriptions as $p): ?>
+                <?php foreach ($prescriptions as $i => $p): ?>
                   <tr>
-                    <td><?= (int) $p['id'] ?></td>
+                    <td><?= $i + 1 ?></td>
                     <td><?= e(
                         ($p['doctor_last'] ?? '') .
                             ' ' .
                             ($p['doctor_first'] ?? ''),
                     ) ?></td>
                     <td>
-                      <div style="white-space: pre-line;">
-                        
-                        <?= e($p['prescription'] ?? '') ?>
-                        
-                      </div>
-                      
+                      <div style="white-space: pre-line;"><?= e(
+                          $p['prescription'] ?? '',
+                      ) ?></div>
                     </td>
                   </tr>
                 <?php endforeach; ?>

@@ -19,9 +19,11 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
       <h1>Login</h1>
       <?php if (!empty($_SESSION['error'])): ?>
         <div class="error"><?= e($_SESSION['error']) ?></div>
+        <?php unset($_SESSION['error']); ?>
       <?php endif; ?>
       <?php if (!empty($_SESSION['msg'])): ?>
         <div class="notice"><?= e($_SESSION['msg']) ?></div>
+        <?php unset($_SESSION['msg']); ?>
       <?php endif; ?>
 
       <form action="<?= $base ?>/index.php?r=spital/auth/login" method="POST">
@@ -37,8 +39,20 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         <br>
 
         <button type="submit">Sign in</button>
-      </form>
+      </form><div style="margin-top: 1rem; display: flex; gap: .5rem; flex-wrap: wrap">
+        <a href="<?= $base ?>/index.php?r=spital/patients/create"
+           class="btn"
+           style="padding:.5rem .75rem; border:1px solid #0d6efd; color:#0d6efd; text-decoration:none; border-radius:.25rem">
+           Creează cont pacient
+        </a>
+        <a href="<?= $base ?>/index.php?r=spital/doctors/create"
+           class="btn"
+           style="padding:.5rem .75rem; border:1px solid #6c757d; color:#6c757d; text-decoration:none; border-radius:.25rem">
+           Creează cont doctor
+        </a>
+    </div>
     </section>
+    
   </div>
 </body>
 </html>

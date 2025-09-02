@@ -3,6 +3,8 @@ require_once 'app/middleware/Auth.php';
 require_once 'app/middleware/Csrf.php';
 require_once 'app/models/Doctor.php';
 
+require_once __DIR__ . '/../../config/mail.php';
+
 class DoctorController
 {
     public static function index()
@@ -35,6 +37,45 @@ class DoctorController
             require_once 'app/views/doctors/create.php';
             return;
         }
+
+        // Validare server-side (obligatoriu)
+        $first = trim($_POST['first_name'] ?? '');
+        $last = trim($_POST['last_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $pass = trim($_POST['password'] ?? '');
+        $dept = trim($_POST['department'] ?? '');
+        $spec = trim($_POST['specialization'] ?? '');
+        $grade = trim($_POST['grade'] ?? '');
+
+        $errors = [];
+        if ($first === '') {
+            $errors[] = 'Prenume obligatoriu';
+        }
+        if ($last === '') {
+            $errors[] = 'Nume obligatoriu';
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Email invalid';
+        }
+        if ($pass === '') {
+            $errors[] = 'Parola obligatorie';
+        }
+        if ($dept === '') {
+            $errors[] = 'Departament obligatoriu';
+        }
+        if ($spec === '') {
+            $errors[] = 'Specializare obligatorie';
+        }
+        if ($grade === '') {
+            $errors[] = 'Grad obligatoriu';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['error'] = implode(' | ', $errors);
+            require_once 'app/views/doctors/create.php';
+            return;
+        }
+
         $data = [
             'first_name' => $_POST['first_name'] ?? null,
             'last_name' => $_POST['last_name'] ?? null,
@@ -51,7 +92,7 @@ class DoctorController
         $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
         if ($created) {
-            header("Location: {$base}/index.php?r=spital/doctors/index");
+            header("Location: {$base}/index.php?r=spital/auth/login");
             exit();
         } else {
             $_SESSION['error'] = 'Failed to create doctor';
@@ -193,15 +234,21 @@ class DoctorController
             )
             ->fetchAll(PDO::FETCH_ASSOC);
 
-        $recentPresc = $pdo
-            ->query(
-                "
-            SELECT p.id, p.patient_id
-            FROM prescriptions p
-            ORDER BY p.id DESC LIMIT 10
-        ",
-            )
-            ->fetchAll(PDO::FETCH_ASSOC);
+        $recentPresc = [];
+        $doctorId = self::currentDoctorId();
+        $stmt = $pdo->prepare("
+  SELECT pr.*,
+         pu.first_name AS patient_first,
+         pu.last_name  AS patient_last
+  FROM prescriptions pr
+  JOIN patients p ON p.id = pr.patient_id
+  JOIN users pu   ON pu.id = p.user_id
+  WHERE pr.doctor_id = :did
+  ORDER BY pr.id DESC
+  LIMIT 10
+");
+        $stmt->execute(['did' => $doctorId]); // asigură-te că $doctorId e setat
+        $recentPresc = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $recentAdmissions = [];
         try {
@@ -465,13 +512,12 @@ class DoctorController
                     $headers .= "Reply-To: {$from}\r\n";
                     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-                    if (@mail($to, $subject, $body, $headers)) {
+                    if (sendEmail($to, $subject, $body)) {
                         $_SESSION['msg'] =
                             'Prescription created and emailed to patient.';
                     } else {
                         $_SESSION['msg'] = 'Prescription created.';
-                        $_SESSION['error'] =
-                            'Email could not be sent (mail() failed).';
+                        $_SESSION['error'] = 'Email could not be sent.';
                     }
                 } else {
                     $_SESSION['msg'] = 'Prescription created.';

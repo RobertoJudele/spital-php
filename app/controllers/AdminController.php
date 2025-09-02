@@ -24,16 +24,21 @@ class AdminController
                         ORDER BY u.last_name, u.first_name";
         $patients = $pdo->query($sqlPatients)->fetchAll(PDO::FETCH_ASSOC);
 
-        // Pending appointments pentru aprobare
-        $sql = "SELECT a.id, a.date, a.status,
-                       pu.first_name AS patient_first, pu.last_name AS patient_last,
-                       du.first_name AS doctor_first,  du.last_name AS doctor_last
-                FROM appointments a
-                JOIN users pu ON pu.id = a.patient_id
-                JOIN users du ON du.id = a.doctor_id
-                WHERE a.status IS NULL
-                ORDER BY a.date ASC";
-        $pendingAppointments = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        // Pending appointments cu nume corecte
+        $stmt = $pdo->query("
+        SELECT a.id, a.date, a.status,
+               pu.first_name AS patient_first, pu.last_name AS patient_last,
+               du.first_name AS doctor_first, du.last_name AS doctor_last
+        FROM appointments a
+        JOIN patients p ON p.id = a.patient_id
+        JOIN users pu   ON pu.id = p.user_id
+        JOIN doctors d  ON d.id = a.doctor_id
+        JOIN users du   ON du.id = d.user_id
+        WHERE a.status IS NULL
+        ORDER BY a.date ASC, a.id ASC
+    ");
+        $pendingAppointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         // Departments (pentru dropdown)
         $departments = $pdo
             ->query('SELECT id, name FROM departments ORDER BY name')

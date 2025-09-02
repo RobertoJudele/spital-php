@@ -32,29 +32,64 @@ class PatientController
             return;
         }
 
+        // Server-side validation
+        $first = trim($_POST['first_name'] ?? '');
+        $last = trim($_POST['last_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $pass = (string) ($_POST['password'] ?? '');
+        $cnp = trim($_POST['cnp'] ?? '');
+        $blood = trim($_POST['blood_type'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $addr = trim($_POST['address'] ?? '');
+        $all = trim($_POST['allergies'] ?? '');
+
+        $errors = [];
+        if ($first === '') {
+            $errors[] = 'Prenume obligatoriu';
+        }
+        if ($last === '') {
+            $errors[] = 'Nume obligatoriu';
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Email invalid';
+        }
+        if ($pass === '') {
+            $errors[] = 'Parolă obligatorie';
+        }
+        if (!preg_match('/^\d{13}$/', $cnp)) {
+            $errors[] = 'CNP invalid (trebuie 13 cifre)';
+        }
+        if ($blood === '') {
+            $errors[] = 'Grupa sanguină obligatorie';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['error'] = implode(' | ', $errors);
+            require_once 'app/views/patients/create.php';
+            return;
+        }
+
         $data = [
-            'first_name' => $_POST['first_name'] ?? null,
-            'last_name' => $_POST['last_name'] ?? null,
-            'email' => $_POST['email'] ?? null,
-            'password' => password_hash(
-                $_POST['password'] ?? '',
-                PASSWORD_BCRYPT,
-            ),
-            'cnp' => $_POST['cnp'] ?? null,
-            'phone' => $_POST['phone'] ?? null,
-            'address' => $_POST['address'] ?? null,
-            'blood_type' => $_POST['blood_type'] ?? null,
-            'allergies' => $_POST['allergies'] ?? null,
+            'first_name' => $first,
+            'last_name' => $last,
+            'email' => $email,
+            'password' => password_hash($pass, PASSWORD_BCRYPT),
+            'cnp' => $cnp,
+            'phone' => $phone,
+            'address' => $addr,
+            'blood_type' => $blood,
+            'allergies' => $all,
         ];
 
         $created = Patient::create($data);
         $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         if ($created) {
-            header("Location: {$base}/index.php?r=spital/patients/index");
+            header("Location: {$base}/index.php?r=spital/auth/login");
             exit();
         }
+
         $_SESSION['error'] = 'Failed to create patient';
-        require_once 'app/views/404.php';
+        require_once 'app/views/patients/create.php';
     }
     public static function edit()
     {

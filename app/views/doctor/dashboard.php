@@ -182,10 +182,14 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
           <table>
             <thead><tr><th>#</th><th>Patient</th></tr></thead>
             <tbody>
-              <?php foreach ($recentPresc as $p): ?>
+              <?php foreach ($recentPresc as $i => $p): ?>
                 <tr>
-                  <td>#<?= (int) $p['id'] ?></td>
-                  <td>patient #<?= (int) $p['patient_id'] ?></td>
+                  <td>#<?= $i + 1 ?></td>
+                  <td><?= e(
+                      ($p['patient_last'] ?? '') .
+                          ' ' .
+                          ($p['patient_first'] ?? ''),
+                  ) ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -198,9 +202,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
             <div class="col-3">
               <h3>Medical records</h3>
               <ul class="list">
-                <?php foreach ($recentRecords as $r): ?>
+                <?php foreach ($recentRecords as $i => $r): ?>
                   <li class="item">
-                    <h4>#<?= (int) $r['id'] ?></h4>
+                    <h4>#<?= $i + 1 ?></h4>
                     <div class="kv"><div><?= e(
                         $r['last_name'] . ' ' . $r['first_name'],
                     ) ?></div></div>
@@ -211,9 +215,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
             <div class="col-3">
               <h3>Consultations</h3>
               <ul class="list">
-                <?php foreach ($recentConsults as $c): ?>
+                <?php foreach ($recentConsults as $i => $c): ?>
                   <li class="item">
-                    <h4>#<?= (int) $c['id'] ?></h4>
+                    <h4>#<?= $i + 1 ?></h4>
                     <div class="kv">
                       <div><?= e($c['consultation_date']) ?></div>
                       <div>MR #<?= (int) $c['medical_record_id'] ?></div>
@@ -225,12 +229,17 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
             <div class="col-3">
               <h3>Prescriptions</h3>
               <ul class="list">
-                <?php foreach ($recentPresc as $p): ?>
-                  <li class="item"><h4>#<?= (int) $p[
-                      'id'
-                  ] ?></h4><div class="kv"><div>patient #<?= (int) $p[
-    'patient_id'
-] ?></div></div></li>
+                <?php foreach ($recentPresc as $i => $p): ?>
+                  <li class="item">
+                    <h4>#<?= $i + 1 ?></h4>
+                    <div class="kv">
+                      <div><?= e(
+                          ($p['patient_last'] ?? '') .
+                              ' ' .
+                              ($p['patient_first'] ?? ''),
+                      ) ?></div>
+                    </div>
+                  </li>
                 <?php endforeach; ?>
               </ul>
             </div>
