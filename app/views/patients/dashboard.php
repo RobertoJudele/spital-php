@@ -302,6 +302,9 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
         <section class="card col-12">
           <h2>Prescriptions</h2>
+          <div class="toolbar">
+            <a class="btn" href="<?= $base ?>/index.php?r=spital/export/my-prescriptions-csv">Export CSV</a>
+          </div>
           <?php if (!empty($prescriptions)): ?>
             <table>
               <thead>

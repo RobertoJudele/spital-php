@@ -49,6 +49,10 @@ $routes = [
     ],
     'spital/stats/dashboard' => ['StatsController', 'dashboard'],
     'spital/stats/data' => ['StatsController', 'data'],
+    'spital/export/my-prescriptions-csv' => [
+        'ExportController',
+        'exportMyPrescriptionsCsv',
+    ],
 ];
 
 class Router
