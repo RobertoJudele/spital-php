@@ -53,6 +53,9 @@ $routes = [
         'ExportController',
         'exportMyPrescriptionsCsv',
     ],
+    'spital/admin/patients/edit' => ['AdminController', 'editPatient'],
+    'spital/admin/patients/update' => ['AdminController', 'updatePatient'],
+    'spital/admin/patients/delete' => ['AdminController', 'deletePatient'],
 ];
 
 class Router

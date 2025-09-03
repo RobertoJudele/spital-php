@@ -637,6 +637,3 @@ class DoctorController
         return $val; // fix: întoarce mereu un string
     }
 }
-// DE REZOLVAT AZI
-
-// Consulatiosn cu prescriptuoin si last admission probabil au porbleme cu numele de tabel sau au nevoie de anumite campuri adaugate

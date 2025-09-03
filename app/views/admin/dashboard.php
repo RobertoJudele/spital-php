@@ -10,13 +10,19 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
   <link rel="stylesheet" href="<?= $base ?>/public/assets/css/dashboard-shared.css">
 </head>
 <body>
-  <header>
-    <h1>Admin Dashboard</h1>
-    <form action="<?= $base ?>/index.php?r=spital/auth/logout" method="POST" style="margin-bottom:0">
-      <input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>">
-      <button type="submit">Logout</button>
+  <header class="appbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <h1>Admin Dashboard</h1>
+    </div>
+    <div class="actions">
+      <form action="<?= $base ?>/index.php?r=spital/auth/logout" method="POST" style="margin-bottom:0">
+        <input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>">
+        <button type="submit">Logout</button>
+      </form>
       <a class="btn" href="<?= $base ?>/index.php?r=spital/stats/dashboard" style="margin-left:8px;">📊 Statistics</a>
-    </form>
+      <a class="btn" href="<?= $base ?>/index.php?r=spital/patients/index">All patients</a>
+    </div>
   </header>
 
   <?php if (!empty($_SESSION['msg'])): ?>

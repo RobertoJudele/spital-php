@@ -3,28 +3,33 @@ require_once 'config/pdo.php';
 
 class Patient
 {
-    public static function getAllPatients()
+    public static function getAllPatients(): array
     {
         global $pdo;
-        $sql = "SELECT u.id AS user_id, u.first_name, u.last_name, u.email,
-                       p.cnp, p.phone, p.address, p.blood_type, p.allergies
-                FROM users u
-                JOIN patients p ON p.user_id = u.id";
-        $stmt = $pdo->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sql = "
+            SELECT u.id AS user_id, u.first_name, u.last_name, u.email,
+                   p.id AS patient_id, p.cnp, p.phone, p.address, p.blood_type, p.allergies
+            FROM patients p
+            JOIN users u ON u.id = p.user_id
+            ORDER BY u.last_name, u.first_name
+        ";
+        return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getPatient($userId)
+    public static function getPatient(int $userId): ?array
     {
         global $pdo;
-        $sql = "SELECT u.id AS user_id, u.first_name, u.last_name, u.email,
-                       p.cnp, p.phone, p.address, p.blood_type, p.allergies
-                FROM users u
-                JOIN patients p ON p.user_id = u.id
-                WHERE u.id = :id";
-        $stmt = $pdo->prepare($sql);
+        $stmt = $pdo->prepare("
+            SELECT u.id AS user_id, u.first_name, u.last_name, u.email, u.password,
+                   p.id AS patient_id, p.cnp, p.phone, p.address, p.blood_type, p.allergies
+            FROM patients p
+            JOIN users u ON u.id = p.user_id
+            WHERE u.id = :id
+            LIMIT 1
+        ");
         $stmt->execute(['id' => $userId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
     }
 
     public static function create($data)
@@ -90,10 +95,14 @@ class Patient
         try {
             $pdo->beginTransaction();
 
-            $sqlUser = "UPDATE users
-                        SET first_name=:first_name, last_name=:last_name, email=:email, password=:password
-                        WHERE id=:id";
-            $stmt = $pdo->prepare($sqlUser);
+            $stmt = $pdo->prepare("
+                UPDATE users
+                   SET first_name = :first_name,
+                       last_name  = :last_name,
+                       email      = :email,
+                       password   = :password
+                 WHERE id = :id
+            ");
             $stmt->execute([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
@@ -102,16 +111,21 @@ class Patient
                 'id' => $userId,
             ]);
 
-            $sqlPat = "UPDATE patients
-                       SET cnp=:cnp, phone=:phone, address=:address, blood_type=:blood_type, allergies=:allergies
-                       WHERE user_id=:id";
-            $stmt = $pdo->prepare($sqlPat);
+            $stmt = $pdo->prepare("
+                UPDATE patients
+                   SET cnp        = :cnp,
+                       phone      = :phone,
+                       address    = :address,
+                       blood_type = :blood_type,
+                       allergies  = :allergies
+                 WHERE user_id = :id
+            ");
             $stmt->execute([
-                'cnp' => $data['cnp'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'address' => $data['address'] ?? null,
-                'blood_type' => $data['blood_type'] ?? null,
-                'allergies' => $data['allergies'] ?? null,
+                'cnp' => $data['cnp'],
+                'phone' => $data['phone'],
+                'address' => $data['address'],
+                'blood_type' => $data['blood_type'],
+                'allergies' => $data['allergies'],
                 'id' => $userId,
             ]);
 
